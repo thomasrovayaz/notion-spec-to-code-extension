@@ -1,0 +1,20 @@
+{
+    "manifest_version": 3,
+    "version": "0.1",
+    "name": "Notion specifications to code",
+    "description": "Fetch specification content from a Notion page and generate shell commands using the OpenAI API.",
+    "permissions": ["activeTab", "scripting", "storage", "clipboardWrite", "notifications"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icon16.png"
+        }
+    },
+    "host_permissions": [
+        "https://notion.so/*"
+    ],
+    "options_page": "options.html"
+}

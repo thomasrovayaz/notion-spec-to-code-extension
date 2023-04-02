@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        button {
+            background-color: #3498db;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 10px 0;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 100px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 15px;
+            padding: 20px;
+        }
+        input, textarea {
+            width: 300px;
+            display: block;
+            padding: 10px 10px;
+            margin-top: 5px;
+        }
+
+
+        #saveApiKeyContainer:not(.saved) #apiKeySaved {
+            display: none;
+        }
+        #saveApiKeyContainer.saved button {
+            display: none;
+        }
+        #apiKeySaved {
+            display: flex;
+            color: #096e09;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div>
+        <label for="apiKey">OpenAI api key</label>
+        <input id="apiKey" type="text" placeholder="Your OpenAI api key" />
+    </div>
+    <div>
+        <label for="customPrompt">Custom prompt to add in every request</label>
+        <textarea id="customPrompt" rows="4" placeholder="A custom prompt to add on the ChatGPT message"></textarea>
+    </div>
+    <div id="saveApiKeyContainer">
+        <div id="apiKeySaved">Saved !</div>
+        <button id="saveApiKey">Save</button>
+    </div>
+</div>
+<script src="options.js"></script>
+</body>
+</html>

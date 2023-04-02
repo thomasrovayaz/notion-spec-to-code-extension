@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html {
+            width: 500px;
+            max-height: 550px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 2s linear infinite;
+        }
+
+        #copyCommandsContainer:not(.copied) #commandsCopied {
+            display: none;
+        }
+        #copyCommandsContainer.copied button {
+            display: none;
+        }
+
+        #generateCommandsContainer:not(.loading) .loader {
+            display: none;
+        }
+        #generateCommandsContainer.loading button {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #commands {
+            margin-top: 10px;
+            white-space: pre-line;
+            max-height: 300px;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        button {
+            background-color: #3498db;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 10px 0;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+        }
+        button:hover {
+            background-color: #0b70b7;
+        }
+        button:disabled {
+            background-color: #b0b0b0;
+            cursor: default;
+        }
+
+        p {
+            white-space: pre-line;
+            background: rgb(247, 246, 243);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #commandsCopied {
+            display: flex;
+            color: #096e09;
+        }
+        .actions > div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 100px;
+        }
+        .error {
+            color: #b02114;
+        }
+        #notCommandsOfPage {
+            display: none;
+        }
+        input, textarea {
+            width: 300px;
+            display: block;
+            padding: 10px 10px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Notion specifications to code</h1>
+
+    <h4>Copy and run the generated shell commands</h4>
+
+    <h4 class="error" id="notCommandsOfPage">Those commands were not generated for the current page!</h4>
+
+    <p id="commands"></p>
+
+    <div>
+        <label for="technology">Technology to use</label>
+        <input id="technology" type="text" placeholder="By default it is NestJS" />
+    </div>
+    <div>
+        <label for="customPrompt">Custom prompt</label>
+        <textarea id="customPrompt" rows="4" placeholder="A custom prompt to add on the ChatGPT message"></textarea>
+    </div>
+
+    <div class="actions">
+        <div id="copyCommandsContainer">
+            <div id="commandsCopied">Copied !</div>
+            <button id="copyCommands">Copy</button>
+        </div>
+        <div id="generateCommandsContainer">
+            <div class="loader"></div>
+            <button id="generateCommands">Generate</button>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
