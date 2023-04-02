@@ -65,16 +65,19 @@ chrome.runtime.onInstalled.addListener(({ reason, version }) => {
 async function callChatGPT(pageId, apiKey, customPrompt, technology, customPromptTmp) {
     const pageContent = document.getElementsByTagName('main')[0].innerText;
     try {
-        let generatedCommands = '';
+        let generatedCommands;
         let prompt = `Generate the shell commands to create the files based on the following specifications:\n${pageContent}\n`
             + `Do not write any other text than the shell commands.`
-            + `No titles, no descriptions, no comments. Just the shell commands.`
-            + `Use the echo command to write in the files.`
-            + `The DTO always have a class and a separate file. DTOs are using decorators Exclude, Expose from class-transformer library, the class has the decorator Exclude, each api property has the Expose decorator. Fully describe the properties, fill the api property options of nestjs/swagger.`
+            + `You should reply ONLY the shell commands so I can copy your response directly in the terminal.`
+            + `Use the echo command to write the code in the files.`
             + `${customPrompt}\n`
             + `${customPromptTmp}\n`;
 
         console.log(prompt);
+        const messages = [
+            {"role": "user", "content": `Ignore all instructions before this one. You’re a senior developer. You have been making development for 20 years. Your task is now to generate ${technology} code. You must ALWAYS review your code and correct it BEFORE you answer so you can improve the quality of your code.`},
+            {"role": "user", "content": prompt}
+        ]
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -83,17 +86,15 @@ async function callChatGPT(pageId, apiKey, customPrompt, technology, customPromp
             },
             body: JSON.stringify({
                 "model": "gpt-3.5-turbo",
-                "messages": [
-                    {"role": "user", "content": `Ignore all instructions before this one. You’re a developer. You have been making development for 20 years. Your task is now to generate ${technology} code.`},
-                    {"role": "user", "content": prompt}
-                ],
+                "messages": messages,
                 n: 1,
                 stop: null,
                 temperature: 0.2,
             })
         }).then(response => response.json());
 
-        generatedCommands = response.choices[0].message.content.trim();
+        let choice = response.choices[0]
+        generatedCommands = choice.message.content.trim().replaceAll('$', '\\$');
 
         console.log('Generated commands:\n');
         console.log(generatedCommands);
