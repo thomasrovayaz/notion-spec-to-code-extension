@@ -9,8 +9,8 @@ const notCommandsOfPage = document.getElementById('notCommandsOfPage');
 
 function renderCommands() {
     chrome.storage.local.get(['apiKey', 'commands'], ({ apiKey, commands }) => {
-        console.log("renderCommands apiKey", apiKey);
         if (commands) {
+            copyCommandButton.disabled = false;
             commandsDiv.innerHTML = commands;
         } else {
             copyCommandButton.disabled = true;
@@ -19,6 +19,8 @@ function renderCommands() {
         if (!apiKey) {
             generateCommandButton.disabled = true;
             commandsDiv.innerHTML = 'Please set your API key in the options page.';
+        } else {
+            generateCommandButton.disabled = false;
         }
     });
     renderWarningOtherPageCommands()
