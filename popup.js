@@ -3,7 +3,7 @@ const copyCommandButton = document.getElementById('copyCommands');
 const generateCommandContainer = document.getElementById('generateCommandsContainer');
 const generateCommandButton = document.getElementById('generateCommands');
 const technologyInput = document.getElementById('technology');
-const customPromptInput = document.getElementById('customPrompt');
+const currentPromptInput = document.getElementById('currentPrompt');
 const commandsDiv = document.getElementById('commands');
 const notCommandsOfPage = document.getElementById('notCommandsOfPage');
 
@@ -50,16 +50,24 @@ async function renderLoading() {
         generateCommandContainer.className = loading? 'loading': '';
     });
 }
+function renderPrompt() {
+    chrome.storage.local.get(['currentPrompt'], ({ currentPrompt }) => {
+        currentPromptInput.value = currentPrompt;
+    });
+}
 
 chrome.storage.local.onChanged.addListener((changes) => {
     if (changes.commands) {
         renderCommands()
     } else if (changes.loading){
         renderLoading()
+    } else if (changes.currentPrompt) {
+        renderPrompt()
     }
 });
 renderCommands()
 renderLoading()
+renderPrompt()
 
 function urlToPageId(url) {
     if (!url || !url.includes('notion.so')) {
@@ -88,6 +96,6 @@ generateCommandButton.addEventListener('click', async (event) => {
     chrome.runtime.sendMessage({
         command: 'callChatGPT',
         technology: technologyInput.value,
-        customPrompt: customPromptInput.value,
+        currentPrompt: currentPromptInput.value,
     });
 });

@@ -27,11 +27,22 @@
             gap: 15px;
             padding: 20px;
         }
+        .container > div {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 5px;
+        }
         input, textarea {
-            width: 300px;
             display: block;
             padding: 10px 10px;
-            margin-top: 5px;
+        }
+        input {
+            width: 300px;
+        }
+        textarea {
+            width: 600px;
         }
 
 
@@ -60,7 +71,7 @@
     </div>
     <div>
         <label for="customPrompt">Custom prompt to add in every request</label>
-        <textarea id="customPrompt" rows="4" placeholder="A custom prompt to add on the ChatGPT message"></textarea>
+        <textarea id="customPrompt" rows="6" placeholder="A custom prompt to add on the ChatGPT message"></textarea>
     </div>
     <div id="saveApiKeyContainer">
         <div id="apiKeySaved">Saved !</div>

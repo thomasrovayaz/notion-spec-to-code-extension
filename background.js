@@ -10,6 +10,11 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                 try {
                     const pageId = urlToPageId(tabs[0].url);
 
+                    chrome.storage.local.set({
+                            currentPrompt: msg.currentPrompt
+                        }
+                    );
+
                     await chrome.scripting.executeScript({
                         target: { tabId: tabs[0].id },
                         args: [
@@ -17,7 +22,7 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                             apiKey,
                             customPrompt || '',
                             msg.technology || 'NestJS',
-                            msg.customPrompt || ''
+                            msg.currentPrompt || ''
                         ],
                         func: callChatGPT
                     });
@@ -68,7 +73,7 @@ async function callChatGPT(pageId, apiKey, customPrompt, technology, customPromp
         let generatedCommands;
         let prompt = `Generate the shell commands to create the files based on the following specifications:\n${pageContent}\n`
             + `Do not write any other text than the shell commands.`
-            + `You should reply ONLY the shell commands so I can copy your response directly in the terminal.`
+            + `You should reply ONLY the shell commands so I can copy and paste your response directly in the terminal.`
             + `Use the echo command to write the code in the files.`
             + `${customPrompt}\n`
             + `${customPromptTmp}\n`;
@@ -94,7 +99,9 @@ async function callChatGPT(pageId, apiKey, customPrompt, technology, customPromp
         }).then(response => response.json());
 
         let choice = response.choices[0]
-        generatedCommands = choice.message.content.trim().replaceAll('$', '\\$');
+        generatedCommands = choice.message.content.trim()
+            .replaceAll('!', '\\!')
+            .replaceAll('$', '\\$');
 
         console.log('Generated commands:\n');
         console.log(generatedCommands);
