@@ -1,491 +1,603 @@
-const nestJSGenerator = [
+const generators = [
     {
-        id: "structure",
-        title: "Generate Structure",
-        prompt: "You should create all the folders.",
+        "id": "structure",
+        "title": "Generate Structure",
+        "prompt": "You should create all the folders.",
     },
     {
-        id: "controller",
-        title: "Generate Controller",
-        prompt: "You should only generate the code of the controller files. The controller files contains 'controller.ts' in the name. You should not generate any other file.",
-        example: "import {\n" +
-            "  Controller,\n" +
-            "  Get,\n" +
-            "  Req,\n" +
-            "  UseGuards,\n" +
-            "  UseInterceptors,\n" +
-            "} from '@nestjs/common'\n" +
-            "import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'\n" +
-            "import { plainToInstance } from 'class-transformer'\n" +
-            "\n" +
-            "import { AuthenticatedWorker, WorkerAuthGuard } from '@hublo/auth'\n" +
-            "import { ApiRoute } from '@hublo/decorators'\n" +
-            "\n" +
-            "import { ExampleInterceptor } from '../../domain/interceptors/example-error.interceptor'\n" +
-            "import { GetExampleService } from '../../services/example/get-example.service'\n" +
-            "\n" +
-            "import { GetExampleResponseDto } from './dtos/get-example-response.dto'\n" +
-            "\n" +
-            "@ApiTags('Example')\n" +
-            "@Controller('example')\n" +
-            "@ApiBearerAuth()\n" +
-            "export class GetExampleController {\n" +
-            "  constructor(\n" +
-            "    private readonly getExampleService: GetExampleService,\n" +
-            "  ) {}\n" +
-            "\n" +
-            "  @ApiRoute({\n" +
-            "    summary: 'Get example',\n" +
-            "    ok: {\n" +
-            "      type: GetExampleResponseDto,\n" +
-            "    },\n" +
-            "    forbidden: {},\n" +
-            "    notFound: {},\n" +
-            "    serviceUnavailable: {},\n" +
-            "    unauthorized: {},\n" +
-            "  })\n" +
-            "  @Get()\n" +
-            "  @UseGuards(WorkerAuthGuard)\n" +
-            "  @UseInterceptors(ExampleInterceptor)\n" +
-            "  async getExample(@Req() { user }: { user: AuthenticatedWorker }) {\n" +
-            "    const example = await this.getExampleService.getExample(user)\n" +
-            "    return plainToInstance(GetExampleResponseDto, example)\n" +
-            "  }\n" +
-            "}\n"
+        "id": "controller",
+        "title": "Generate Controller",
+        "regex": /controller.ts$/,
+        "promptOneFile": "You should generate the code of the controller file ",
+        "prompt": "You should only generate the code of the controller files. The controller files contains 'controller.ts' in the name. You should not generate any other file.",
+        "example": `import {
+  Controller,
+  Get,
+  Req,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { plainToInstance } from 'class-transformer'
+
+import { AuthenticatedWorker, WorkerAuthGuard } from '@hublo/auth'
+import { ApiRoute } from '@hublo/decorators'
+
+import { ExampleInterceptor } from '../../domain/interceptors/example-error.interceptor'
+import { GetExampleService } from '../../services/example/get-example.service'
+
+import { GetExampleResponseDto } from './dtos/get-example-response.dto'
+
+@ApiTags('Example')
+@Controller('example')
+@ApiBearerAuth()
+export class GetExampleController {
+  constructor(
+    private readonly getExampleService: GetExampleService,
+  ) {}
+
+  @ApiRoute({
+    summary: 'Get example',
+    ok: {
+      type: GetExampleResponseDto,
+    },
+    forbidden: {},
+    notFound: {},
+    serviceUnavailable: {},
+    unauthorized: {},
+  })
+  @Get()
+  @UseGuards(WorkerAuthGuard)
+  @UseInterceptors(ExampleInterceptor)
+  async getExample(@Req() { user }: { user: AuthenticatedWorker }) {
+    const example = await this.getExampleService.getExample(user)
+    return plainToInstance(GetExampleResponseDto, example)
+  }
+}`
     }, {
-        id: "controller-unit-test",
-        title: "Generate Controller Unit Test",
-        prompt: "You should only generate the code of the unit test file of the controllers. The unit test files of a controller contains 'controller.spec.ts' in the name. You should not generate any other file.",
-        example: "import type { NestFastifyApplication } from '@nestjs/platform-fastify'\n" +
-            "import { mockDeep } from 'jest-mock-extended'\n" +
-            "\n" +
-            "import { path as apiTypesPath } from '@hublo/api-types/bff-worker/GetExampleController/getExample'\n" +
-            "import type { AuthenticatedWorker } from '@hublo/auth'\n" +
-            "import {\n" +
-            "  DatabaseQueryFailedException,\n" +
-            "  RemoteBackendException,\n" +
-            "  ResourceAccessException,\n" +
-            "} from '@hublo/exceptions'\n" +
-            "\n" +
-            "import { BffWorkerTestWrapper } from '../../../../app/test/bff-worker.test-wrapper'\n" +
-            "import { NoExampleFoundError } from '../../domain/errors/no-example-found.error'\n" +
-            "import { GetExampleService } from '../../services/get-example/get-example.service'\n" +
-            "\n" +
-            "import { GetExampleResponseDto } from './dtos/get-example-response.dto'\n" +
-            "import { GetExampleController } from './get-example.controller'\n" +
-            "\n" +
-            "describe('GetExampleController', () => {\n" +
-            "  const path = apiTypesPath.replace('/bff-worker', '')\n" +
-            "  let getExampleController: GetExampleController\n" +
-            "  let app: NestFastifyApplication\n" +
-            "  const mockedGetExampleService =\n" +
-            "    mockDeep<GetExampleService>()\n" +
-            "  const user = { id: 1, userType: 'worker' } as AuthenticatedWorker\n" +
-            "  const mockedExample = { }\n" +
-            "\n" +
-            "  beforeEach(async () => {\n" +
-            "    app = await BffWorkerTestWrapper.createTestingApp({\n" +
-            "      controllers: [GetExampleController],\n" +
-            "      providers: [\n" +
-            "        {\n" +
-            "          provide: GetExampleService,\n" +
-            "          useValue: mockedGetExampleService,\n" +
-            "        },\n" +
-            "      ],\n" +
-            "      imports: [],\n" +
-            "    })\n" +
-            "\n" +
-            "    getExampleController = app.get(GetExampleController)\n" +
-            "\n" +
-            "    mockedGetExampleService.getExample.mockResolvedValue(mockedExample)\n" +
-            "  })\n" +
-            "\n" +
-            "  describe('getExample', () => {\n" +
-            "    it('should return an instance of GetExampleResponseDto', async () => {\n" +
-            "      const result = await getExampleController.getExample({\n" +
-            "        user,\n" +
-            "      })\n" +
-            "\n" +
-            "      expect(result).toBeInstanceOf(GetExampleResponseDto)\n" +
-            "    })\n" +
-            "\n" +
-            "    describe('when GET request is valid', () => {\n" +
-            "      it('should return a 200 response', async () => {\n" +
-            "        const result = await app.inject({\n" +
-            "          method: 'GET',\n" +
-            "          url: path,\n" +
-            "          headers: {\n" +
-            "            user: JSON.stringify(user),\n" +
-            "          },\n" +
-            "        })\n" +
-            "\n" +
-            "        expect(result.statusCode).toBe(200)\n" +
-            "      })\n" +
-            "\n" +
-            "      it('should return a plain object GetExampleResponseDto', async () => {\n" +
-            "        const result = await app.inject({\n" +
-            "          method: 'GET',\n" +
-            "          url: path,\n" +
-            "          headers: {\n" +
-            "            user: JSON.stringify(user),\n" +
-            "          },\n" +
-            "        })\n" +
-            "\n" +
-            "        expect(result.json()).toStrictEqual({ })\n" +
-            "      })\n" +
-            "    })\n" +
-            "\n" +
-            "    describe('when worker token is not valid', () => {\n" +
-            "      it('should return a 403 forbidden error', async () => {\n" +
-            "        const result = await app.inject({\n" +
-            "          method: 'GET',\n" +
-            "          url: path,\n" +
-            "        })\n" +
-            "\n" +
-            "        expect(result.statusCode).toBe(403)\n" +
-            "      })\n" +
-            "    })\n" +
-            "\n" +
-            "    describe('when GET request fails', () => {\n" +
-            "      it('should return a 403 forbidden error', async () => {\n" +
-            "        mockedGetExampleService.getExample.mockRejectedValue(\n" +
-            "          new ResourceAccessException('Forbidden Access'),\n" +
-            "        )\n" +
-            "\n" +
-            "        const result = await app.inject({\n" +
-            "          method: 'GET',\n" +
-            "          url: path,\n" +
-            "          headers: {\n" +
-            "            user: JSON.stringify(user),\n" +
-            "          },\n" +
-            "        })\n" +
-            "\n" +
-            "        expect(result.statusCode).toBe(403)\n" +
-            "      })\n" +
-            "\n" +
-            "      it('should return a 404 not found error', async () => {\n" +
-            "        mockedGetExampleService.getExample.mockRejectedValue(\n" +
-            "          new NoExampleFoundError(user.hubloId as string),\n" +
-            "        )\n" +
-            "\n" +
-            "        const result = await app.inject({\n" +
-            "          method: 'GET',\n" +
-            "          url: path,\n" +
-            "          headers: {\n" +
-            "            user: JSON.stringify(user),\n" +
-            "          },\n" +
-            "        })\n" +
-            "\n" +
-            "        expect(result.statusCode).toBe(404)\n" +
-            "      })\n" +
-            "\n" +
-            "      it('should return a 502 bad gateway error when query fails', async () => {\n" +
-            "        mockedGetExampleService.getExample.mockRejectedValue(\n" +
-            "          new DatabaseQueryFailedException(''),\n" +
-            "        )\n" +
-            "\n" +
-            "        const result = await app.inject({\n" +
-            "          method: 'GET',\n" +
-            "          url: path,\n" +
-            "          headers: {\n" +
-            "            user: JSON.stringify(user),\n" +
-            "          },\n" +
-            "        })\n" +
-            "\n" +
-            "        expect(result.statusCode).toBe(502)\n" +
-            "      })\n" +
-            "\n" +
-            "      it('should return a 503 service unavailable error when remote fails', async () => {\n" +
-            "        mockedGetExampleService.getExample.mockRejectedValue(\n" +
-            "          new RemoteBackendException('', '', new Error()),\n" +
-            "        )\n" +
-            "\n" +
-            "        const result = await app.inject({\n" +
-            "          method: 'GET',\n" +
-            "          url: path,\n" +
-            "          headers: {\n" +
-            "            user: JSON.stringify(user),\n" +
-            "          },\n" +
-            "        })\n" +
-            "\n" +
-            "        expect(result.statusCode).toBe(503)\n" +
-            "      })\n" +
-            "    })\n" +
-            "  })\n" +
-            "})\n"
+        "id": "controller-unit-test",
+        "title": "Generate Controller Unit Test",
+        "regex": /controller.spec.ts$/,
+        "promptOneFile": "You should generate the code of the controller unit test file ",
+        "prompt": "You should only generate the code of the unit test file of the controllers. The unit test files of a controller contains 'controller.spec.ts' in the name. You should not generate any other file.",
+        "example": `import type { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { mockDeep } from 'jest-mock-extended'
+
+import { path as apiTypesPath } from '@hublo/api-types/bff-worker/GetExampleController/getExample'
+import type { AuthenticatedWorker } from '@hublo/auth'
+import {
+  DatabaseQueryFailedException,
+  RemoteBackendException,
+  ResourceAccessException,
+} from '@hublo/exceptions'
+
+import { BffWorkerTestWrapper } from '../../../../app/test/bff-worker.test-wrapper'
+import { NoExampleFoundError } from '../../domain/errors/no-example-found.error'
+import { GetExampleService } from '../../services/get-example/get-example.service'
+
+import { GetExampleResponseDto } from './dtos/get-example-response.dto'
+import { GetExampleController } from './get-example.controller'
+
+describe('GetExampleController', () => {
+  const path = apiTypesPath.replace('/bff-worker', '')
+  let getExampleController: GetExampleController
+  let app: NestFastifyApplication
+  const mockedGetExampleService =
+    mockDeep<GetExampleService>()
+  const user = { id: 1, userType: 'worker' } as AuthenticatedWorker
+  const mockedExample = { }
+
+  beforeEach(async () => {
+    app = await BffWorkerTestWrapper.createTestingApp({
+      controllers: [GetExampleController],
+      providers: [
+        {
+          provide: GetExampleService,
+          useValue: mockedGetExampleService,
+        },
+      ],
+      imports: [],
+    })
+
+    getExampleController = app.get(GetExampleController)
+
+    mockedGetExampleService.getExample.mockResolvedValue(mockedExample)
+  })
+
+  describe('getExample', () => {
+    it('should return an instance of GetExampleResponseDto', async () => {
+      const result = await getExampleController.getExample({
+        user,
+      })
+
+      expect(result).toBeInstanceOf(GetExampleResponseDto)
+    })
+
+    describe('when GET request is valid', () => {
+      it('should return a 200 response', async () => {
+        const result = await app.inject({
+          method: 'GET',
+          url: path,
+          headers: {
+            user: JSON.stringify(user),
+          },
+        })
+
+        expect(result.statusCode).toBe(200)
+      })
+
+      it('should return a plain object GetExampleResponseDto', async () => {
+        const result = await app.inject({
+          method: 'GET',
+          url: path,
+          headers: {
+            user: JSON.stringify(user),
+          },
+        })
+
+        expect(result.json()).toStrictEqual({ })
+      })
+    })
+
+    describe('when worker token is not valid', () => {
+      it('should return a 403 forbidden error', async () => {
+        const result = await app.inject({
+          method: 'GET',
+          url: path,
+        })
+
+        expect(result.statusCode).toBe(403)
+      })
+    })
+
+    describe('when GET request fails', () => {
+      it('should return a 403 forbidden error', async () => {
+        mockedGetExampleService.getExample.mockRejectedValue(
+          new ResourceAccessException('Forbidden Access'),
+        )
+
+        const result = await app.inject({
+          method: 'GET',
+          url: path,
+          headers: {
+            user: JSON.stringify(user),
+          },
+        })
+
+        expect(result.statusCode).toBe(403)
+      })
+
+      it('should return a 404 not found error', async () => {
+        mockedGetExampleService.getExample.mockRejectedValue(
+          new NoExampleFoundError(user.hubloId as string),
+        )
+
+        const result = await app.inject({
+          method: 'GET',
+          url: path,
+          headers: {
+            user: JSON.stringify(user),
+          },
+        })
+
+        expect(result.statusCode).toBe(404)
+      })
+
+      it('should return a 502 bad gateway error when query fails', async () => {
+        mockedGetExampleService.getExample.mockRejectedValue(
+          new DatabaseQueryFailedException(''),
+        )
+
+        const result = await app.inject({
+          method: 'GET',
+          url: path,
+          headers: {
+            user: JSON.stringify(user),
+          },
+        })
+
+        expect(result.statusCode).toBe(502)
+      })
+
+      it('should return a 503 service unavailable error when remote fails', async () => {
+        mockedGetExampleService.getExample.mockRejectedValue(
+          new RemoteBackendException('', '', new Error()),
+        )
+
+        const result = await app.inject({
+          method: 'GET',
+          url: path,
+          headers: {
+            user: JSON.stringify(user),
+          },
+        })
+
+        expect(result.statusCode).toBe(503)
+      })
+    })
+  })
+})`
     }, {
         id: "service",
         title: "Generate Service",
+        regex: /service\.ts$/,
+        promptOneFile: "You should generate the code of the service file ",
         prompt: "You should only generate the code of the service files. The service files contains 'service.ts' in the name. You should not generate any other file.",
-        example: "import { Injectable } from '@nestjs/common'\n" +
-            "\n" +
-            "import { ExampleProvider } from '../../domain/provider-contracts/example.provider'\n" +
-            "\n" +
-            "@Injectable()\n" +
-            "export class ExampleService {\n" +
-            "  constructor(\n" +
-            "    @Inject(ExampleProvider)\n" +
-            "    private readonly exampleProvider: ExampleProvider,\n" +
-            "  ) {}\n" +
-            "\n" +
-            "  async getExample(\n" +
-            "    authenticatedWorker: AuthenticatedWorker,\n" +
-            "  ): Promise<number | undefined> {\n" +
-            "    const example = await this.exampleProvider.getExample(\n" +
-            "      authenticatedWorker.hubloId,\n" +
-            "    )\n" +
-            "\n" +
-            "    return example\n" +
-            "  }\n" +
-            "}\n"
+        example: `import { Injectable } from '@nestjs/common'
+
+import { ExampleProvider } from '../../domain/provider-contracts/example.provider'
+
+@Injectable()
+export class ExampleService {
+  constructor(
+    @Inject(ExampleProvider)
+    private readonly exampleProvider: ExampleProvider,
+  ) {}
+
+  async getExample(
+    authenticatedWorker: AuthenticatedWorker,
+  ): Promise<number | undefined> {
+    const example = await this.exampleProvider.getExample(
+      authenticatedWorker.hubloId,
+    )
+
+    return example
+  }
+}`
     },  {
         id: "service-unit-test",
+        regex: /service\.spec\.ts$/,
         title: "Generate Service Unit Test",
+        promptOneFile: "You should generate the code of the service unit test file ",
         prompt: "You should only generate the code of the unit test files of the services. The unit test files of a service contains 'service.spec.ts' in the name. You should not generate any other file.",
-        example: "import { mockDeep } from 'jest-mock-extended'\n" +
-            "\n" +
-            "import { authenticatedWorker } from '@hublo/auth'\n" +
-            "\n" +
-            "import { NoExampleFoundError } from '../../domain/errors/no-example-found.error'\n" +
-            "import { mockedExample } from '../../domain/mocks/mocks.mock'\n" +
-            "import type { ExampleProvider } from '../../domain/provider-contracts/example.provider'\n" +
-            "\n" +
-            "import { GetExampleService } from './get-example.service'\n" +
-            "\n" +
-            "describe('GetExampleService', () => {\n" +
-            "  let getExampleService: GetExampleService\n" +
-            "  const mockedExampleProvider = mockDeep<ExampleProvider>()\n" +
-            "\n" +
-            "  beforeEach(() => {\n" +
-            "    getExampleService = new GetExampleService(\n" +
-            "      mockedExampleProvider,\n" +
-            "    )\n" +
-            "  })\n" +
-            "\n" +
-            "  describe('getExample', () => {\n" +
-            "    it('should get example correctly', async () => {\n" +
-            "      // given\n" +
-            "      mockedExampleProvider.getExample.mockResolvedValue(\n" +
-            "        mockedExample,\n" +
-            "      )\n" +
-            "\n" +
-            "      // when\n" +
-            "      const example = await getExampleService.getExample(\n" +
-            "        authenticatedWorker,\n" +
-            "      )\n" +
-            "\n" +
-            "      // then\n" +
-            "      expect(\n" +
-            "        mockedExampleProvider.getExample,\n" +
-            "      ).toHaveBeenCalledWith(authenticatedWorker.hubloId)\n" +
-            "      expect(example).toBe({ })\n" +
-            "    })\n" +
-            "\n" +
-            "    it('should throw not found error if no example is available', async () => {\n" +
-            "      // given\n" +
-            "      mockedExampleProvider.getExample.mockRejectedValue(\n" +
-            "        new NoExampleFoundError(authenticatedWorker.hubloId),\n" +
-            "      )\n" +
-            "\n" +
-            "      // when & then\n" +
-            "      await expect(\n" +
-            "        getExampleService.getExample(authenticatedWorker),\n" +
-            "      ).rejects.toThrow(NoExampleFoundError)\n" +
-            "    })\n" +
-            "  })\n" +
-            "})\n"
+        example: `import { mockDeep } from 'jest-mock-extended'
+
+import { authenticatedWorker } from '@hublo/auth'
+
+import { NoExampleFoundError } from '../../domain/errors/no-example-found.error'
+import { mockedExample } from '../../domain/mocks/mocks.mock'
+import type { ExampleProvider } from '../../domain/provider-contracts/example.provider'
+
+import { GetExampleService } from './get-example.service'
+
+describe('GetExampleService', () => {
+  let getExampleService: GetExampleService
+  const mockedExampleProvider = mockDeep<ExampleProvider>()
+
+  beforeEach(() => {
+    getExampleService = new GetExampleService(
+      mockedExampleProvider,
+    )
+  })
+
+  describe('getExample', () => {
+    it('should get example correctly', async () => {
+      // given
+      mockedExampleProvider.getExample.mockResolvedValue(
+        mockedExample,
+      )
+
+      // when
+      const example = await getExampleService.getExample(
+        authenticatedWorker,
+      )
+
+      // then
+      expect(
+        mockedExampleProvider.getExample,
+      ).toHaveBeenCalledWith(authenticatedWorker.hubloId)
+      expect(example).toBe({ })
+    })
+
+    it('should throw not found error if no example is available', async () => {
+      // given
+      mockedExampleProvider.getExample.mockRejectedValue(
+        new NoExampleFoundError(authenticatedWorker.hubloId),
+      )
+
+      // when & then
+      await expect(
+        getExampleService.getExample(authenticatedWorker),
+      ).rejects.toThrow(NoExampleFoundError)
+    })
+  })
+})`
     },  {
         id: "module",
         title: "Generate Module",
+        regex: /module\.ts$/,
+        promptOneFile: "You should generate the code of the module file ",
         prompt: "You should only generate the code of the module file. The module file contains 'module.ts' in the name. You should not generate any other file.",
-        example: "import { Module } from '@nestjs/common'\n" +
-            "\n" +
-            "import { GetExampleController } from './controllers/get-example/get-example.controller'\n" +
-            "import { ExampleProvider } from './domain/provider-contracts/example.contract'\n" +
-            "import { ExampleProviderHttpImpl } from './providers/example/example.https.provider'\n" +
-            "import { GetExampleService } from './services/get-example/get-example.service'\n" +
-            "\n" +
-            "@Module({\n" +
-            "  providers: [\n" +
-            "    {\n" +
-            "      provide: ExampleProvider,\n" +
-            "      useClass: ExampleProviderHttpImpl,\n" +
-            "    },\n" +
-            "    GetExampleService,\n" +
-            "  ],\n" +
-            "  controllers: [GetExampleController],\n" +
-            "})\n" +
-            "export class HubloPoolOfferModule {}\n"
+        example: `import { Module } from '@nestjs/common'
+
+import { GetExampleController } from './controllers/get-example/get-example.controller'
+import { ExampleProvider } from './domain/provider-contracts/example.contract'
+import { ExampleProviderHttpImpl } from './providers/example/example.https.provider'
+import { GetExampleService } from './services/get-example/get-example.service'
+
+@Module({
+  providers: [
+    {
+      provide: ExampleProvider,
+      useClass: ExampleProviderHttpImpl,
+    },
+    GetExampleService,
+  ],
+  controllers: [GetExampleController],
+})
+export class HubloPoolOfferModule {}`
     },  {
         id: "provider",
         title: "Generate Provider",
+        regex: /provider\.ts$/,
+        promptOneFile: "You should generate the code of the provider file ",
         prompt: "You should only generate the code of the provider files. A provider file contains 'provider.ts' in the name. You should not generate any other file.",
-        example: "import { HttpService } from '@nestjs/axios'\n" +
-            "import {\n" +
-            "  BadRequestException,\n" +
-            "  ConflictException,\n" +
-            "  Inject,\n" +
-            "  Injectable,\n" +
-            "  NotFoundException,\n" +
-            "} from '@nestjs/common'\n" +
-            "import type { AxiosError } from 'axios'\n" +
-            "import { catchError, lastValueFrom, map } from 'rxjs'\n" +
-            "\n" +
-            "import {\n" +
-            "  GetExampleSuccess,\n" +
-            "  GetExampleFailure,\n" +
-            "  getPath,\n" +
-            "} from '@hublo/api-types/service-example/GetExampleController/getExample'\n" +
-            "import { AppConfig } from '@hublo/configuration'\n" +
-            "import {\n" +
-            "  ResourceAccessException,\n" +
-            "  DatabaseQueryFailedException,\n" +
-            "  RemoteBackendException,\n" +
-            "  RemoteDependencyException,\n" +
-            "} from '@hublo/exceptions'\n" +
-            "\n" +
-            "import type { BFFWorkerAppConfig } from '../../../../app/config/bff-worker-app.config'\n" +
-            "import type { HubloPoolOfferProvider } from '../../domain/provider-contracts/hublo-pool-offer.contract'\n" +
-            "\n" +
-            "@Injectable()\n" +
-            "export class ExampleProviderHttpImpl implements ExampleProvider {\n" +
-            "  constructor(\n" +
-            "    @Inject(AppConfig)\n" +
-            "    private readonly config: BFFWorkerAppConfig,\n" +
-            "    private readonly httpService: HttpService,\n" +
-            "  ) {}\n" +
-            "\n" +
-            "  async getExample(\n" +
-            "    hubloId: string,\n" +
-            "  ): Promise<GetExampleSuccess> {\n" +
-            "    const url = `${this.config.monorepoBaseUrl}${getPath(hubloId)}`\n" +
-            "\n" +
-            "    const response = await lastValueFrom(\n" +
-            "      this.httpService\n" +
-            "        .get<GetExampleSuccess>(url, {\n" +
-            "          headers: {\n" +
-            "            Authorization: `Bearer `,\n" +
-            "          },\n" +
-            "        })\n" +
-            "        .pipe(map((result) => result.data))\n" +
-            "        .pipe(\n" +
-            "          catchError((err: AxiosError<{ message?: string }>) => {\n" +
-            "            const status = err.response?.status\n" +
-            "            if (status === 502) {\n" +
-            "              throw new DatabaseQueryFailedException(err.message)\n" +
-            "            }\n" +
-            "            if (status === 404) {\n" +
-            "              throw new NotFoundException(err.message)\n" +
-            "            }\n" +
-            "            throw new RemoteBackendException(url, err.message, err)\n" +
-            "          }),\n" +
-            "        ),\n" +
-            "    )\n" +
-            "\n" +
-            "    return response\n" +
-            "  }\n" +
-            "}\n"
+        example: `import { HttpService } from '@nestjs/axios'
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
+import type { AxiosError } from 'axios'
+import { catchError, lastValueFrom, map } from 'rxjs'
+
+import {
+  GetExampleSuccess,
+  GetExampleFailure,
+  getPath,
+} from '@hublo/api-types/service-example/GetExampleController/getExample'
+import { AppConfig } from '@hublo/configuration'
+import {
+  ResourceAccessException,
+  DatabaseQueryFailedException,
+  RemoteBackendException,
+  RemoteDependencyException,
+} from '@hublo/exceptions'
+
+import type { BFFWorkerAppConfig } from '../../../../app/config/bff-worker-app.config'
+import type { HubloPoolOfferProvider } from '../../domain/provider-contracts/hublo-pool-offer.contract'
+
+@Injectable()
+export class ExampleProviderHttpImpl implements ExampleProvider {
+  constructor(
+    @Inject(AppConfig)
+    private readonly config: BFFWorkerAppConfig,
+    private readonly httpService: HttpService,
+  ) {}
+
+  async getExample(
+    hubloId: string,
+  ): Promise<GetExampleSuccess> {
+    const url = \`\${this.config.monorepoBaseUrl}\${getPath(hubloId)}\`
+
+    const response = await lastValueFrom(
+      this.httpService
+        .get<GetExampleSuccess>(url, {
+          headers: {
+            Authorization: \`Bearer \`,
+          },
+        })
+        .pipe(map((result) => result.data))
+        .pipe(
+          catchError((err: AxiosError<{ message?: string }>) => {
+            const status = err.response?.status
+            if (status === 502) {
+              throw new DatabaseQueryFailedException(err.message)
+            }
+            if (status === 404) {
+              throw new NotFoundException(err.message)
+            }
+            throw new RemoteBackendException(url, err.message, err)
+          }),
+        ),
+    )
+
+    return response
+  }
+}`
     },  {
         id: "provider-unit-test",
         title: "Generate Provider Unit Test",
+        regex: /provider\.spec\.ts$/,
+        promptOneFile: "You should generate the code of the provider unit test file ",
         prompt: "You should only generate the code of the unit test files of the providers. The unit test files of the provider contains 'provider.spec.ts' in the name. You should not generate any other file.",
-        example: "import {\n" +
-            "  BadRequestException,\n" +
-            "  ConflictException,\n" +
-            "  NotFoundException,\n" +
-            "} from '@nestjs/common'\n" +
-            "import { REQUEST } from '@nestjs/core'\n" +
-            "import type { TestingModule } from '@nestjs/testing'\n" +
-            "import { rest } from 'msw'\n" +
-            "\n" +
-            "import { getPath } from '@hublo/api-types/service-example/GetExampleController/getExample'\n" +
-            "import { authenticatedWorker } from '@hublo/auth'\n" +
-            "import { AppConfig } from '@hublo/configuration'\n" +
-            "import {\n" +
-            "  DatabaseQueryFailedException,\n" +
-            "  RemoteDependencyException,\n" +
-            "  ResourceAccessException,\n" +
-            "} from '@hublo/exceptions'\n" +
-            "import { HttpServiceModule } from '@hublo/http/http.module'\n" +
-            "import { AppLoggerModule } from '@hublo/logs'\n" +
-            "import { server } from '@hublo/test/msw/server'\n" +
-            "\n" +
-            "import type { BFFWorkerAppConfig } from '../../../../app/config/bff-worker-app.config'\n" +
-            "import { BffWorkerTestWrapper } from '../../../../app/test/bff-worker.test-wrapper'\n" +
-            "import { mockedExample } from '../../domain/mocks/mocks.mock'\n" +
-            "\n" +
-            "import { ExampleProviderHttpImpl } from './example.provider'\n" +
-            "\n" +
-            "describe('Example provider', () => {\n" +
-            "  let exampleProvider: ExampleProviderHttpImpl\n" +
-            "  let module: TestingModule\n" +
-            "  let config: BFFWorkerAppConfig\n" +
-            "\n" +
-            "  beforeAll(async () => {\n" +
-            "    module = await BffWorkerTestWrapper.createTestingModule({\n" +
-            "      imports: [HttpServiceModule, AppLoggerModule],\n" +
-            "      providers: [ExampleProviderHttpImpl],\n" +
-            "    })\n" +
-            "      .overrideProvider(REQUEST)\n" +
-            "      .useValue({ authInfo: { token: 'token' } })\n" +
-            "      .compile()\n" +
-            "\n" +
-            "    exampleProvider = await module.resolve(ExampleProviderHttpImpl)\n" +
-            "    config = module.get<BFFWorkerAppConfig>(AppConfig)\n" +
-            "  })\n" +
-            "\n" +
-            "  it('should be defined', () => {\n" +
-            "    // then\n" +
-            "    expect(exampleProvider).toBeDefined()\n" +
-            "  })\n" +
-            "\n" +
-            "  describe('Get example', () => {\n" +
-            "    it('should returns example when successful', async () => {\n" +
-            "      const idHubler = authenticatedWorker.hubloId\n" +
-            "      // given\n" +
-            "      server.use(\n" +
-            "        rest.get(\n" +
-            "          `${config.monorepoBaseUrl}${getPath(idHubler)}`,\n" +
-            "          (_, res, ctx) => res(ctx.status(204), ctx.json(mockedExample)),\n" +
-            "        ),\n" +
-            "      )\n" +
-            "\n" +
-            "      // when & then\n" +
-            "      const result = await exampleProvider.getExample(idHubler)\n" +
-            "      expect(result.result).toBe(mockedExample)\n" +
-            "    })\n" +
-            "\n" +
-            "    it('should throw DatabaseQueryFailedException', async () => {\n" +
-            "      // given\n" +
-            "      const idHubler = authenticatedWorker.hubloId\n" +
-            "      server.use(\n" +
-            "        rest.get(\n" +
-            "          `${config.monorepoBaseUrl}${getPath(idHubler)}`,\n" +
-            "          (_, res, ctx) => res(ctx.status(502), ctx.json({})),\n" +
-            "        ),\n" +
-            "      )\n" +
-            "\n" +
-            "    it('should throw NotFoundException', async () => {\n" +
-            "      // given\n" +
-            "      const idHubler = authenticatedWorker.hubloId\n" +
-            "      // given\n" +
-            "      server.use(\n" +
-            "        rest.get(\n" +
-            "          `${config.monorepoBaseUrl}${getPath(idHubler)}`,\n" +
-            "          (_, res, ctx) => res(ctx.status(404), ctx.json({})),\n" +
-            "        ),\n" +
-            "      )\n" +
-            "\n" +
-            "      // when\n" +
-            "      const output = exampleProvider.getExample(idHubler)\n" +
-            "\n" +
-            "      // then\n" +
-            "      await expect(output).rejects.toThrow(NotFoundException)\n" +
-            "    })\n" +
-            "  })\n" +
-            "})\n"
-    }]
+        example: `import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common'
+import { REQUEST } from '@nestjs/core'
+import type { TestingModule } from '@nestjs/testing'
+import { rest } from 'msw'
 
+import { getPath } from '@hublo/api-types/service-example/GetExampleController/getExample'
+import { authenticatedWorker } from '@hublo/auth'
+import { AppConfig } from '@hublo/configuration'
+import {
+  DatabaseQueryFailedException,
+  RemoteDependencyException,
+  ResourceAccessException,
+} from '@hublo/exceptions'
+import { HttpServiceModule } from '@hublo/http/http.module'
+import { AppLoggerModule } from '@hublo/logs'
+import { server } from '@hublo/test/msw/server'
+
+import type { BFFWorkerAppConfig } from '../../../../app/config/bff-worker-app.config'
+import { BffWorkerTestWrapper } from '../../../../app/test/bff-worker.test-wrapper'
+import { mockedExample } from '../../domain/mocks/mocks.mock'
+
+import { ExampleProviderHttpImpl } from './example.provider'
+
+describe('Example provider', () => {
+  let exampleProvider: ExampleProviderHttpImpl
+  let module: TestingModule
+  let config: BFFWorkerAppConfig
+
+  beforeAll(async () => {
+    module = await BffWorkerTestWrapper.createTestingModule({
+      imports: [HttpServiceModule, AppLoggerModule],
+      providers: [ExampleProviderHttpImpl],
+    })
+      .overrideProvider(REQUEST)
+      .useValue({ authInfo: { token: 'token' } })
+      .compile()
+
+    exampleProvider = await module.resolve(ExampleProviderHttpImpl)
+    config = module.get<BFFWorkerAppConfig>(AppConfig)
+  })
+
+  it('should be defined', () => {
+    // then
+    expect(exampleProvider).toBeDefined()
+  })
+
+  describe('Get example', () => {
+    it('should returns example when successful', async () => {
+      const idHubler = authenticatedWorker.hubloId
+      // given
+      server.use(
+        rest.get(
+          \`\${config.monorepoBaseUrl}\${getPath(idHubler)}\`,
+          (_, res, ctx) => res(ctx.status(204), ctx.json(mockedExample)),
+        ),
+      )
+
+      // when & then
+      const result = await exampleProvider.getExample(idHubler)
+      expect(result.result).toBe(mockedExample)
+    })
+
+    it('should throw DatabaseQueryFailedException', async () => {
+      // given
+      const idHubler = authenticatedWorker.hubloId
+      server.use(
+        rest.get(
+          \`\${config.monorepoBaseUrl}\${getPath(idHubler)}\`,
+          (_, res, ctx) => res(ctx.status(502), ctx.json({})),
+        ),
+      )
+
+    it('should throw NotFoundException', async () => {
+      // given
+      const idHubler = authenticatedWorker.hubloId
+      // given
+      server.use(
+        rest.get(
+          \`\${config.monorepoBaseUrl}\${getPath(idHubler)}\`,
+          (_, res, ctx) => res(ctx.status(404), ctx.json({})),
+        ),
+      )
+
+      // when
+      const output = exampleProvider.getExample(idHubler)
+
+      // then
+      await expect(output).rejects.toThrow(NotFoundException)
+    })
+  })
+})`,
+    },  {
+        id: "dto",
+        title: "Generate DTO",
+        regex: /\.dto\.ts$/,
+        promptOneFile: "You should generate the code of the DTO file ",
+        prompt: "You should only generate the code of the DTO files. The DTO files contains '.dto.ts' in the name. You should not generate any other file.",
+        example: `import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { Exclude, Expose } from 'class-transformer'
+
+@Exclude()
+export class ExampleResponseDto {
+  @Expose()
+  @ApiProperty({ type: Number, example: 1, description: 'The example id' })
+  id: number
+
+  @Expose()
+  @ApiPropertyOptional({
+    type: String,
+    example: 'Super example',
+    description: 'The example description',
+  })
+  description?: string
+
+  @Expose()
+  @ApiProperty({
+    type: String,
+    example: '2023-03-10T12:00:00.000Z',
+    format: 'date-time',
+    description: 'The created at date',
+  })
+  createdAt: string
+
+  @Expose()
+  @ApiProperty({
+    type: String,
+    example: 'author',
+    description: 'The authoer name',
+  })
+  authorName: string
+}`
+    },  {
+        id: "interceptor",
+        title: "Generate interceptor",
+        regex: /\.interceptor\.ts$/,
+        promptOneFile: "You should generate the code of the interceptor file ",
+        prompt: "You should only generate the code of the interceptor files. The interceptor files contains '.interceptor.ts' in the name. You should not generate any other file.",
+        example: `import {
+  CallHandler,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  NestInterceptor,
+  ServiceUnavailableException,
+} from '@nestjs/common'
+import type { Observable } from 'rxjs'
+import { catchError } from 'rxjs/operators'
+
+import {
+  DatabaseQueryFailedException,
+  RemoteBackendException,
+  RemoteDependencyException,
+  ResourceAccessException,
+} from '@hublo/exceptions'
+import type { CustomError } from '@hublo/utils'
+
+@Injectable()
+export class GetExampleInterceptor implements NestInterceptor {
+  intercept(_context: ExecutionContext, next: CallHandler): Observable<void> {
+    return next.handle().pipe(
+        catchError((err: CustomError) => {
+          switch (err.constructor) {
+            case ResourceAccessException:
+              throw new ForbiddenException(err.message)
+            case RemoteBackendException:
+              throw new ServiceUnavailableException(err.message)
+            case RemoteDependencyException:
+              throw err.toHttpException(500)
+            case DatabaseQueryFailedException:
+              throw err.toHttpException(502)
+            default:
+              throw err
+          }
+        }),
+    )
+  }
+}`
+    },  {
+        id: "types",
+        title: "Generate types",
+        regex: /\.types\.ts$/,
+        promptOneFile: "You should generate the code of the types file ",
+        prompt: "You should only generate the code of the types files. The types files contains '.types.ts' in the name. You should not generate any other file.",
+        example: `export type Example = {
+  id: number
+  description?: string
+  createdAt: string
+  authorName: string
+}`
+    }
+]
 chrome.runtime.onMessage.addListener(async (msg) => {
     if (msg.command === 'callChatGPT') {
         await chrome.storage.local.get(['customPrompt', 'apiKey'], async ({ customPrompt, apiKey }) => {
@@ -500,7 +612,7 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                         }
                     );
 
-                    if (msg.currentPrompt ) {
+                    if (msg.currentPrompt) {
                         const generatedCommands = await chrome.scripting.executeScript({
                             target: { tabId: tabs[0].id },
                             args: [
@@ -512,14 +624,59 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                             ],
                             func: callChatGPTWithSpec
                         });
-                        console.log(generatedCommands[0].result)
+                        const filesGenerationCommands = generatedCommands[0].result
+                        console.log(filesGenerationCommands)
+                        const files = filesGenerationCommands
+                            .split('\n')
+                            .filter((line) => line.startsWith('echo "" >'))
+                            .map((line) => line.replace('echo "" >', ''))
+
+                        const results = (
+                            await Promise.all(
+                                files.map(async (file) => {
+                                    const nestJSFile =
+                                        generators
+                                        .find(
+                                            (nestJSGeneratorElement) =>
+                                                nestJSGeneratorElement.regex && nestJSGeneratorElement.regex.test(file))
+                                    if (!nestJSFile) {
+                                        console.log(`no nest file description found for ${file}`)
+                                        return undefined;
+                                    }
+                                    const generatedCommands = await chrome.scripting.executeScript({
+                                        target: {tabId: tabs[0].id},
+                                        args: [
+                                            pageId,
+                                            apiKey,
+                                            customPrompt || '',
+                                            msg.technology || 'NestJS',
+                                            `${nestJSFile.promptOneFile} "${file}". You should not write any other file. You should try your best to understand and implement the logic of the file. You should understand and use the style of code from this example of code: "${nestJSFile.example}".`
+                                        ],
+                                        func: callChatGPTWithSpec
+                                    });
+                                    console.log(`${nestJSFile.id} loaded`)
+                                    console.log(generatedCommands[0].result)
+                                    return {
+                                        id: nestJSFile.id,
+                                        title: nestJSFile.title,
+                                        result: generatedCommands[0].result
+                                    }
+                                }))
+                        )
+                            .filter((result) => result !== undefined);
+
+                        console.log("results")
+                        console.log(results)
                         chrome.storage.local.set({
-                            'commands': generatedCommands[0].result,
+                            'commands': [
+                                filesGenerationCommands,
+                                ...results.map(({result}) => result)
+                            ].join('\n'),
                             'lastPageGenerated': pageId
                         });
                     } else {
                         const results = await Promise.all(
-                            nestJSGenerator.map(async (nestJSGeneratorElement) => {
+                            generators.map(async (nestJSGeneratorElement) => {
                                 const generatedCommands = await chrome.scripting.executeScript({
                                     target: {tabId: tabs[0].id},
                                     args: [
@@ -623,9 +780,10 @@ async function callChatGPTWithSpec(pageId, apiKey, customPrompt, technology, cus
             }).then(response => response.json());
 
             let choice = response.choices[0]
-            generatedCommands = choice.message.content.trim()
+            const generatedCommands = choice.message.content.trim()
                 .replaceAll('!', '\\!')
-                .replaceAll('$', '\\$');
+                .replaceAll('$', '\\$')
+                .replaceAll('```', '');
 
             //console.log('Generated commands:\n');
             //console.log(generatedCommands);
