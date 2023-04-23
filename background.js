@@ -8,7 +8,7 @@ const generators = [
         "id": "controller",
         "title": "Generate Controller",
         "regex": /controller.ts$/,
-        "promptOneFile": "You should generate the code of the controller file ",
+        "promptOneFile": "You should generate the code of the controller file FILENAME. ",
         "prompt": "You should only generate the code of the controller files. The controller files contains 'controller.ts' in the name. You should not generate any other file.",
         "example": `import {
   Controller,
@@ -54,11 +54,12 @@ export class GetExampleController {
     return plainToInstance(GetExampleResponseDto, example)
   }
 }`
-    }, {
+    },
+    {
         "id": "controller-unit-test",
         "title": "Generate Controller Unit Test",
         "regex": /controller.spec.ts$/,
-        "promptOneFile": "You should generate the code of the controller unit test file ",
+        "promptOneFile": "You should generate the code of the controller unit test file FILENAME. ",
         "prompt": "You should only generate the code of the unit test file of the controllers. The unit test files of a controller contains 'controller.spec.ts' in the name. You should not generate any other file.",
         "example": `import type { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { mockDeep } from 'jest-mock-extended'
@@ -217,11 +218,12 @@ describe('GetExampleController', () => {
     })
   })
 })`
-    }, {
+    },
+    {
         id: "service",
         title: "Generate Service",
         regex: /service\.ts$/,
-        promptOneFile: "You should generate the code of the service file ",
+        promptOneFile: "You should generate the code of the service file FILENAME. ",
         prompt: "You should only generate the code of the service files. The service files contains 'service.ts' in the name. You should not generate any other file.",
         example: `import { Injectable } from '@nestjs/common'
 
@@ -244,11 +246,12 @@ export class ExampleService {
     return example
   }
 }`
-    },  {
+    },
+    {
         id: "service-unit-test",
         regex: /service\.spec\.ts$/,
         title: "Generate Service Unit Test",
-        promptOneFile: "You should generate the code of the service unit test file ",
+        promptOneFile: "You should generate the code of the service unit test file FILENAME. ",
         prompt: "You should only generate the code of the unit test files of the services. The unit test files of a service contains 'service.spec.ts' in the name. You should not generate any other file.",
         example: `import { mockDeep } from 'jest-mock-extended'
 
@@ -302,11 +305,12 @@ describe('GetExampleService', () => {
     })
   })
 })`
-    },  {
+    },
+    {
         id: "module",
         title: "Generate Module",
         regex: /module\.ts$/,
-        promptOneFile: "You should generate the code of the module file ",
+        promptOneFile: "You should only generate the code of the module file FILENAME. ",
         prompt: "You should only generate the code of the module file. The module file contains 'module.ts' in the name. You should not generate any other file.",
         example: `import { Module } from '@nestjs/common'
 
@@ -326,11 +330,26 @@ import { GetExampleService } from './services/get-example/get-example.service'
   controllers: [GetExampleController],
 })
 export class HubloPoolOfferModule {}`
-    },  {
-        id: "provider",
-        title: "Generate Provider",
-        regex: /provider\.ts$/,
-        promptOneFile: "You should generate the code of the provider file ",
+    },
+    {
+        id: "contract_provider",
+        title: "Generate Contract Provider",
+        regex: /contracts\/.*\.provider\.ts$/,
+        promptOneFile: "You should generate the code of the contract provider file FILENAME. It is an interface that defines the methods of the provider. ",
+        prompt: "You should only generate the code of the provider files. A provider file contains 'provider.ts' in the name. You should not generate any other file.",
+        example: `import type { Example } from '../types/example.type'
+
+export interface ExampleProvider {
+  getExample(id: string): Promise<Example>
+}
+
+export const ExampleProvider = Symbol('ExampleProvider')`
+    },
+    {
+        id: "http_provider",
+        title: "Generate HTTP Provider",
+        regex: /https\.provider\.ts$/,
+        promptOneFile: "You should generate the code of the http provider file FILENAME. ",
         prompt: "You should only generate the code of the provider files. A provider file contains 'provider.ts' in the name. You should not generate any other file.",
         example: `import { HttpService } from '@nestjs/axios'
 import {
@@ -357,7 +376,8 @@ import {
 } from '@hublo/exceptions'
 
 import type { BFFWorkerAppConfig } from '../../../../app/config/bff-worker-app.config'
-import type { HubloPoolOfferProvider } from '../../domain/provider-contracts/hublo-pool-offer.contract'
+import type { ExampleProvider } from '../../domain/provider-contracts/example.contract'
+import type { Example } from '../../domain/types/example.types'
 
 @Injectable()
 export class ExampleProviderHttpImpl implements ExampleProvider {
@@ -369,7 +389,7 @@ export class ExampleProviderHttpImpl implements ExampleProvider {
 
   async getExample(
     hubloId: string,
-  ): Promise<GetExampleSuccess> {
+  ): Promise<Example> {
     const url = \`\${this.config.monorepoBaseUrl}\${getPath(hubloId)}\`
 
     const response = await lastValueFrom(
@@ -397,11 +417,56 @@ export class ExampleProviderHttpImpl implements ExampleProvider {
     return response
   }
 }`
-    },  {
+    },
+    {
+        id: "mongo_provider",
+        title: "Generate mongo Provider",
+        regex: /(mongo|pg)\.provider\.ts$/,
+        promptOneFile: "You should generate the code of the mongo provider file FILENAME. Prisma is used to make the queries.  ",
+        prompt: "You should only generate the code of the provider files. A provider file contains 'provider.ts' in the name. You should not generate any other file.",
+        example: `import { Injectable } from '@nestjs/common'
+import {
+  DatabaseQueryFailedException,
+  EntityNotFoundException,
+} from '@hublo/exceptions'
+
+import { ExampleDatabaseService } from '../../../app/database/example-database.service'
+
+import type { ExampleProvider } from '../../domain/provider-contracts/example.contract'
+import type { Example } from '../../domain/types/example.types'
+
+@Injectable()
+export class ExampleProviderMongoImpl implements ExampleProvider {
+  constructor(private readonly database: ExampleDatabaseService) {}
+
+  async getExample(
+    id: string,
+  ): Promise<Example> {
+    const example = await this.database.example
+      .findUnique({
+        where: {
+          id: id,
+        },
+      })
+      .catch((err) => {
+        throw new DatabaseQueryFailedException(err)
+      })
+    if (!example) {
+      throw new EntityNotFoundException()
+    }
+
+    return {
+      ...example,
+      description: example.description ?? undefined,
+    }
+  }
+}`
+    },
+    {
         id: "provider-unit-test",
         title: "Generate Provider Unit Test",
         regex: /provider\.spec\.ts$/,
-        promptOneFile: "You should generate the code of the provider unit test file ",
+        promptOneFile: "You should generate the code of the provider unit test file FILENAME. ",
         prompt: "You should only generate the code of the unit test files of the providers. The unit test files of the provider contains 'provider.spec.ts' in the name. You should not generate any other file.",
         example: `import {
   BadRequestException,
@@ -498,14 +563,52 @@ describe('Example provider', () => {
     })
   })
 })`,
-    },  {
+    },
+    {
         id: "dto",
         title: "Generate DTO",
-        regex: /\.dto\.ts$/,
-        promptOneFile: "You should generate the code of the DTO file ",
+        regex: /response\.dto\.ts$/,
+        promptOneFile: "You should generate the code of the DTO file FILENAME. Each ApiProperty should have a description and an example. You should use ApiPropertyOptional if the field is optional. Each field should be decorated with @Expose(). Each DTO class should be decorated with @Exclude(). A DTO should not have a type Object, you should create another DTO class in the file to replace the type object, like author in the following example. ",
         prompt: "You should only generate the code of the DTO files. The DTO files contains '.dto.ts' in the name. You should not generate any other file.",
         example: `import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Exclude, Expose } from 'class-transformer'
+
+@Exclude()
+class AuthorResponseDto {
+  @Expose()
+  @ApiProperty({
+    type: Number,
+    example: 1,
+    description: 'The author ID',
+  })
+  id: string
+  
+  @Expose()
+  @ApiProperty({
+    type: String,
+    example: 'author',
+    description: 'The author name',
+  })
+  name: string
+}
+
+@Exclude()
+class ExampleCommentResponseDto {
+  @Expose()
+  @ApiProperty({
+    type: () => AuthorResponseDto,
+    description: 'The comment author',
+  })
+  author: AuthorResponseDto
+
+  @Expose()
+  @ApiProperty({
+    type: String,
+    example: 'bla bla bla',
+    description: 'The comment text',
+  })
+  text: string
+}
 
 @Exclude()
 export class ExampleResponseDto {
@@ -529,20 +632,27 @@ export class ExampleResponseDto {
     description: 'The created at date',
   })
   createdAt: string
+  
+  @Expose()
+  @ApiProperty({
+    type: () => AuthorResponseDto,
+    description: 'The example author',
+  })
+  author: AuthorResponseDto
 
   @Expose()
   @ApiProperty({
-    type: String,
-    example: 'author',
-    description: 'The authoer name',
+    type: [ExampleCommentResponseDto],
+    description: 'The comments',
   })
-  authorName: string
+  comments: ExampleCommentResponseDto[]
 }`
-    },  {
+    },
+    {
         id: "interceptor",
         title: "Generate interceptor",
         regex: /\.interceptor\.ts$/,
-        promptOneFile: "You should generate the code of the interceptor file ",
+        promptOneFile: "You should generate the code of the interceptor file FILENAME. ",
         prompt: "You should only generate the code of the interceptor files. The interceptor files contains '.interceptor.ts' in the name. You should not generate any other file.",
         example: `import {
   CallHandler,
@@ -584,11 +694,12 @@ export class GetExampleInterceptor implements NestInterceptor {
     )
   }
 }`
-    },  {
+    },
+    {
         id: "types",
         title: "Generate types",
         regex: /\.types\.ts$/,
-        promptOneFile: "You should generate the code of the types file ",
+        promptOneFile: "You should generate the code of the types file FILENAME. ",
         prompt: "You should only generate the code of the types files. The types files contains '.types.ts' in the name. You should not generate any other file.",
         example: `export type Example = {
   id: number
@@ -596,6 +707,24 @@ export class GetExampleInterceptor implements NestInterceptor {
   createdAt: string
   authorName: string
 }`
+    },
+    {
+        id: "exception",
+        title: "Generate exception",
+        regex: /\.exception\.ts$/,
+        promptOneFile: "You should generate the code of the exception file FILENAME. The exception extends CustomError.  ",
+        prompt: "You should only generate the code of the types files. The types files contains '.types.ts' in the name. You should not generate any other file.",
+        example: `import { CustomError } from '@hublo/utils/customError'
+
+export class ExampleNotFound extends CustomError {
+  constructor(idExample: string) {
+    super({
+      name: 'ExampleNotFound',
+      message: \`We could not find an example with id = \${idExample}\`,
+    })
+  }
+}
+`
     }
 ]
 chrome.runtime.onMessage.addListener(async (msg) => {
@@ -624,6 +753,23 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                             ],
                             func: callChatGPTWithSpec
                         });
+                        console.log(generatedCommands[0].result)
+                        chrome.storage.local.set({
+                            'commands': generatedCommands[0].result,
+                            'lastPageGenerated': pageId
+                        });
+                    } else {
+                        const generatedCommands = await chrome.scripting.executeScript({
+                            target: { tabId: tabs[0].id },
+                            args: [
+                                pageId,
+                                apiKey,
+                                customPrompt || '',
+                                msg.technology || 'NestJS',
+                                "You should create all the folders and files."
+                            ],
+                            func: callChatGPTWithSpec
+                        });
                         const filesGenerationCommands = generatedCommands[0].result
                         console.log(filesGenerationCommands)
                         const files = filesGenerationCommands
@@ -636,9 +782,9 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                                 files.map(async (file) => {
                                     const nestJSFile =
                                         generators
-                                        .find(
-                                            (nestJSGeneratorElement) =>
-                                                nestJSGeneratorElement.regex && nestJSGeneratorElement.regex.test(file))
+                                            .find(
+                                                (nestJSGeneratorElement) =>
+                                                    nestJSGeneratorElement.regex && nestJSGeneratorElement.regex.test(file))
                                     if (!nestJSFile) {
                                         console.log(`no nest file description found for ${file}`)
                                         return undefined;
@@ -650,11 +796,11 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                                             apiKey,
                                             customPrompt || '',
                                             msg.technology || 'NestJS',
-                                            `${nestJSFile.promptOneFile} "${file}". You should not write any other file. You should try your best to understand and implement the logic of the file. You should understand and use the style of code from this example of code: "${nestJSFile.example}".`
+                                            `${nestJSFile.promptOneFile.replace("FILENAME", file)}. You should not write any other file. You should understand and use the style of code from this example of code: "${nestJSFile.example}".`
                                         ],
                                         func: callChatGPTWithSpec
                                     });
-                                    console.log(`${nestJSFile.id} loaded`)
+                                    console.log(`${file} loaded`)
                                     console.log(generatedCommands[0].result)
                                     return {
                                         id: nestJSFile.id,
@@ -672,44 +818,6 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                                 filesGenerationCommands,
                                 ...results.map(({result}) => result)
                             ].join('\n'),
-                            'lastPageGenerated': pageId
-                        });
-                    } else {
-                        const results = await Promise.all(
-                            generators.map(async (nestJSGeneratorElement) => {
-                                const generatedCommands = await chrome.scripting.executeScript({
-                                    target: {tabId: tabs[0].id},
-                                    args: [
-                                        pageId,
-                                        apiKey,
-                                        customPrompt || '',
-                                        msg.technology || 'NestJS',
-                                        nestJSGeneratorElement.example ?
-                                            `${nestJSGeneratorElement.prompt}. To accomplish your instructions, you should understand and use the style of code from this example of code: "${nestJSGeneratorElement.example}".`
-                                            : nestJSGeneratorElement.prompt
-                                    ],
-                                    func: callChatGPTWithSpec
-                                });
-                                console.log(`${nestJSGeneratorElement.id} loaded`)
-                                console.log(generatedCommands[0].result)
-                                return {
-                                    id: nestJSGeneratorElement.id,
-                                    title: nestJSGeneratorElement.title,
-                                    result: generatedCommands[0].result
-                                }
-                            })
-                        );
-
-                        console.log("results")
-                        console.log(results)
-                        chrome.storage.local.set({
-                            'commands': results
-                                .sort(
-                                    (a, b) =>
-                                        a.id === 'structure' ? -1 : b.id === 'structure' ? 1 : 0
-                                )
-                                .map(({result}) => result)
-                                .join('\n'),
                             'lastPageGenerated': pageId
                         });
                     }
