@@ -761,9 +761,7 @@ export const useWorkerOffersQuery = (
         title: "Generate MSW interceptor",
         regex: /libs\/front\/api\/src\/msw-handlers\/.*\.interceptor\.ts$/,
         promptOneFile: "You should generate the code of the MSW handler file FILENAME. This hook is used in unit tests to catch the call of the endpoint given on the specification. ",
-        example: `import type {
-    GetExampleSuccess,
-} from '@hublo/api-types/bff-worker/GetExampleController/getExample'
+        example: `import type { GetExampleSuccess } from '@hublo/api-types/bff-worker/GetExampleController/getExample'
 
 import { genericGetHandler } from '../../logic/msw/handlers'
 import { getExampleUrl } from '../../worker-bff/config'
@@ -785,11 +783,24 @@ export const getExample = (
         id: "react-query-config",
         title: "Generate react-query config",
         regex: /libs\/front\/api\/src\/.*\/config\.ts$/,
-        promptOneFile: "In the file FILENAME, you should add the code of the endpoint URL from the given specifications. You should generate the import and the export. You should use a double chevron on the echo command. ",
+        promptOneFile: "In the file FILENAME, you should add the code of the endpoint URL from the given specifications. You should generate the import and the export. You should use a double chevron on the echo command to not erase the existing content. ",
         example: `import { path as getExamplePath } from '@hublo/api-types/bff-worker/GetExampleController/getExample'
-
-export const getExampleUrl = \`${monorepoBaseUrl}${getExamplePath}\`
+export const getExampleUrl = \`\${monorepoBaseUrl}\${getExamplePath}\`
 `
+    },
+    {
+        id: "react-import-msw-handler",
+        title: "Import MSW handler",
+        regex: /libs\/front\/api\/src\/msw-handlers\/.*\/index\.ts$/,
+        promptOneFile: "In the file FILENAME, you should only import the msw interceptor. You should not do anything else. You should use a double chevron on the echo command to not erase the existing content. ",
+        example: `import { getExample } from './getExample.interceptor'`
+    },
+    {
+        id: "react-export-hook",
+        title: "Export react hook",
+        regex: /libs\/front\/api\/src\/(?!msw-handlers\/).*\/index\.ts$/,
+        promptOneFile: "In the file FILENAME, you should only export the react hook. You should not do anything else. You should use a double chevron on the echo command to not erase the existing content. ",
+        example: `export * from './useGetExample'`
     }
 ]
 chrome.runtime.onMessage.addListener(async (msg) => {
@@ -831,7 +842,7 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                                 apiKey,
                                 customPrompt || '',
                                 msg.technology || 'NestJS',
-                                "You should create all the folders and files. You should not write anything in the files. "
+                                "You should create all the folders and files. You should not write anything in the files. You should only use mkdir and touch commands. "
                             ],
                             func: callChatGPTWithSpec
                         });
@@ -887,10 +898,13 @@ chrome.runtime.onMessage.addListener(async (msg) => {
 
                         console.log("results")
                         console.log(results)
+                        const eslintCommand = `eslint ${files.map((file) => file).join(' ')} --fix`
+                        console.log("eslintCommand", eslintCommand)
                         chrome.storage.local.set({
                             'commands': [
                                 filesGenerationCommands,
-                                ...results.map(({result}) => result)
+                                ...results.map(({result}) => result),
+                                eslintCommand,
                             ].join('\n'),
                             'lastPageGenerated': pageId
                         });
@@ -957,7 +971,7 @@ async function callChatGPTWithSpec(pageId, apiKey, customPrompt, technology, cus
                     "messages": messages,
                     n: 1,
                     stop: null,
-                    temperature: 0.2,
+                    temperature: 0,
                 })
             }).then(response => response.json());
 
