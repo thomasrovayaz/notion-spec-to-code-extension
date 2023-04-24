@@ -651,7 +651,7 @@ export class ExampleResponseDto {
     {
         id: "interceptor",
         title: "Generate interceptor",
-        regex: /\.interceptor\.ts$/,
+        regex: /nest\/.*\.interceptor\.ts$/,
         promptOneFile: "You should generate the code of the interceptor file FILENAME. ",
         prompt: "You should only generate the code of the interceptor files. The interceptor files contains '.interceptor.ts' in the name. You should not generate any other file.",
         example: `import {
@@ -725,6 +725,71 @@ export class ExampleNotFound extends CustomError {
   }
 }
 `
+    },
+    {
+        id: "react-query-hook",
+        title: "Generate react-query hook",
+        regex: /libs\/front\/api\/src\/.*\/use.*\.ts$/,
+        promptOneFile: "You should generate the code of the react hook file FILENAME. This hook is used to call the endpoint given on the specification. We use @tanstack/react-query to handle the request. ",
+        example: `import type { QueryObserverResult } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
+
+import type {
+    GetExampleSuccess,
+    GetExampleError,
+} from '@hublo/api-types/bff-worker/GetExampleController/getExample'
+
+import { axiosGet } from '../logic/axios/wrappers/axios.get.wrapper'
+
+import { getExampleUrl } from './config'
+
+export const getExampleKey = 'get-example'
+
+export const useWorkerOffersQuery = (
+    enabled = true,
+): QueryObserverResult<GetExampleSuccess, GetExampleError> =>
+    useQuery(
+        [getExampleKey],
+        () => axiosGet<GetExampleSuccess>(getExampleUrl),
+        {
+            enabled,
+        },
+    )`
+    },
+    {
+        id: "msw-interceptor",
+        title: "Generate MSW interceptor",
+        regex: /libs\/front\/api\/src\/msw-handlers\/.*\.interceptor\.ts$/,
+        promptOneFile: "You should generate the code of the MSW handler file FILENAME. This hook is used in unit tests to catch the call of the endpoint given on the specification. ",
+        example: `import type {
+    GetExampleSuccess,
+} from '@hublo/api-types/bff-worker/GetExampleController/getExample'
+
+import { genericGetHandler } from '../../logic/msw/handlers'
+import { getExampleUrl } from '../../worker-bff/config'
+
+export const getExample = (
+    status: number,
+    result: GetExampleSuccess,
+    applyToServer = true,
+): void =>
+    genericGetHandler({
+        url: getExampleUrl,
+        status,
+        result,
+        applyToServer,
+    })
+`
+    },
+    {
+        id: "react-query-config",
+        title: "Generate react-query config",
+        regex: /libs\/front\/api\/src\/.*\/config\.ts$/,
+        promptOneFile: "In the file FILENAME, you should add the code of the endpoint URL from the given specifications. You should generate the import and the export. You should use a double chevron on the echo command. ",
+        example: `import { path as getExamplePath } from '@hublo/api-types/bff-worker/GetExampleController/getExample'
+
+export const getExampleUrl = \`${monorepoBaseUrl}${getExamplePath}\`
+`
     }
 ]
 chrome.runtime.onMessage.addListener(async (msg) => {
@@ -766,7 +831,7 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                                 apiKey,
                                 customPrompt || '',
                                 msg.technology || 'NestJS',
-                                "You should create all the folders and files."
+                                "You should create all the folders and files. You should not write anything in the files. "
                             ],
                             func: callChatGPTWithSpec
                         });
@@ -774,8 +839,17 @@ chrome.runtime.onMessage.addListener(async (msg) => {
                         console.log(filesGenerationCommands)
                         const files = filesGenerationCommands
                             .split('\n')
-                            .filter((line) => line.startsWith('echo "" >'))
-                            .map((line) => line.replace('echo "" >', ''))
+                            .filter(
+                                (line) =>
+                                    line.startsWith('echo "" >')
+                                    || line.startsWith('touch ')
+                            )
+                            .map(
+                                (line) =>
+                                    line
+                                        .replace('echo "" >', '')
+                                        .replace('touch ', '')
+                            )
 
                         const results = (
                             await Promise.all(
@@ -890,7 +964,6 @@ async function callChatGPTWithSpec(pageId, apiKey, customPrompt, technology, cus
             let choice = response.choices[0]
             const generatedCommands = choice.message.content.trim()
                 .replaceAll('!', '\\!')
-                .replaceAll('$', '\\$')
                 .replaceAll('```', '');
 
             //console.log('Generated commands:\n');
@@ -905,7 +978,7 @@ async function callChatGPTWithSpec(pageId, apiKey, customPrompt, technology, cus
     const pageContent = document.getElementsByTagName('main')[0].innerText;
     try {
         let generatedCommands;
-        let prompt = `I ll give you the specifications of a NestJS module.`
+        let prompt = `I ll give you the specifications.`
             + ` You will understand them and then I ll give some very precise instruction based on those specifications.`
             + ` Do not do anything that is not in the instructions.`
             + ` The specification are: "\n${pageContent}\n". This is the end of the specification.`;
@@ -916,8 +989,8 @@ async function callChatGPTWithSpec(pageId, apiKey, customPrompt, technology, cus
             {"role": "user", "content": prompt},
             {"role": "user", "content": `The instructions are: "${customPromptTmp}".`
                     + `Generate shell commands to make the previous instructions.`
-                    + `Do not write any other text than the shell commands.`
-                    + `You should reply ONLY the shell commands so I can copy and paste your response directly in the terminal.`
+                    + `Do not write any other text than the shell commands. Do not write any comment.`
+                    + `You should reply ONLY the shell commands so I can copy and paste your response directly in the terminal. The response should be a list of shell commands.`
                     + `You can use mkdir and echo command to accomplish the instructions.`},
         ]
         generatedCommands = await callChatGPT(messages);
