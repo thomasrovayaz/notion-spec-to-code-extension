@@ -1,0 +1,12 @@
+#commandsContainer {
+  max-width: 100%;
+}
+
+#commands {
+  margin-top: 10px;
+  white-space: pre-line;
+  max-height: 100px;
+  overflow: auto;
+  padding: 20px;
+  max-width: 100%;
+}

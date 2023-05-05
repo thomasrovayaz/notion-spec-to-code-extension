@@ -1,0 +1,22 @@
+{
+  "name": "notion-spec-to-code-extension",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "preact": "10.13.2"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^1.0.14",
+    "@preact/preset-vite": "2.5.0",
+    "@types/chrome": "0.0.235",
+    "prettier": "2.8.8",
+    "typescript": "5.0.4",
+    "vite": "4.3.4"
+  }
+}

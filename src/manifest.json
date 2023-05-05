@@ -5,14 +5,14 @@
     "description": "Fetch specification content from a Notion page and generate shell commands using the OpenAI API.",
     "permissions": ["activeTab", "scripting", "storage", "clipboardWrite", "notifications"],
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "src/background/background.ts"
     },
     "action": {
-        "default_popup": "popup.html",
+        "default_popup": "index.html",
         "default_icon": {
-            "16": "rocket.png",
-            "48": "rocket.png",
-            "128": "rocket128.png"
+            "16": "assets/rocket.png",
+            "48": "assets/rocket.png",
+            "128": "assets/rocket128.png"
         }
     },
     "host_permissions": [

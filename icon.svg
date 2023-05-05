@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-    <circle cx="64" cy="64" r="64" fill="#EBEBEB"/>
-    <circle cx="32" cy="64" r="32" fill="#3E54D3"/>
-    <circle cx="96" cy="64" r="32" fill="#C6342C"/>
-    <text x="24" y="72" font-family="Arial" font-weight="bold" font-size="24" fill="white">N</text>
-    <text x="85" y="72" font-family="Arial" font-weight="bold" font-size="24" fill="white">AI</text>
-</svg>
