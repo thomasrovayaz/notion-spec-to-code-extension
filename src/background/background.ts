@@ -1,11 +1,9 @@
 import { generateAllFiles } from "./generate-all-files.prompt.ts";
 import { runCustomPrompt } from "./run-custom.prompt.ts";
 import { getPageInfos } from "../utils/page-infos.ts";
-import { getFromLocalStorage } from "../utils/get-from-local-storage.ts";
 
 chrome.runtime.onMessage.addListener(async (msg) => {
   if (msg.command === "callChatGPT") {
-    const { apiKey } = await getFromLocalStorage(["apiKey"]);
     await chrome.storage.local.set({ loading: true });
     try {
       const { content: pageContent, id: pageId } = await getPageInfos();
@@ -16,19 +14,13 @@ chrome.runtime.onMessage.addListener(async (msg) => {
 
       if (msg.currentPrompt) {
         await runCustomPrompt(
-          apiKey,
           msg.technology || "NestJS",
           msg.currentPrompt,
           pageContent,
           pageId
         );
       } else {
-        await generateAllFiles(
-          apiKey,
-          msg.technology || "NestJS",
-          pageContent,
-          pageId
-        );
+        await generateAllFiles(msg.technology || "NestJS", pageContent, pageId);
       }
     } catch (error) {
       console.error("Error generating commands from AI:", error);

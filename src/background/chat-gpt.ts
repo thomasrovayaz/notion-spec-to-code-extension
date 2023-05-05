@@ -1,7 +1,7 @@
-async function callChatGPT(
-  apiKey: string,
-  messages: { role: string; content: string }[]
-) {
+import { getFromLocalStorage } from "../utils/get-from-local-storage.ts";
+
+async function callChatGPT(messages: { role: string; content: string }[]) {
+  const { apiKey, model } = await getFromLocalStorage(["apiKey", "model"]);
   if (!apiKey) {
     window.alert("Please set your API key in the options page.");
     return;
@@ -15,7 +15,7 @@ async function callChatGPT(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: model || "gpt-4",
         messages: messages,
         n: 1,
         stop: null,
@@ -35,7 +35,6 @@ async function callChatGPT(
   }
 }
 export async function callChatGPTWithSpec(
-  apiKey: string,
   technology: string,
   customPrompt: string,
   pageContent: string
@@ -64,7 +63,7 @@ export async function callChatGPTWithSpec(
           `You can use mkdir and echo command to accomplish the instructions.`,
       },
     ];
-    generatedCommands = await callChatGPT(apiKey, messages);
+    generatedCommands = await callChatGPT(messages);
 
     console.log("generatedCommands", generatedCommands);
 

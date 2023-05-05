@@ -4,12 +4,16 @@ import { getFromLocalStorage } from "../utils/get-from-local-storage.ts";
 
 export function App() {
   const [apiKey, setApiKey] = useState("");
+  const [model, setModel] = useState("gpt-4");
   const [saved, setSaved] = useState(false);
 
   const loadFromStorage = async () => {
-    const { apiKey } = await getFromLocalStorage(["apiKey"]);
+    const { apiKey, model } = await getFromLocalStorage(["apiKey", "model"]);
     if (apiKey) {
       setApiKey(apiKey);
+    }
+    if (model) {
+      setModel(model);
     }
   };
 
@@ -21,6 +25,7 @@ export function App() {
     chrome.storage.local.set(
       {
         apiKey,
+        model,
       },
       () => {
         setSaved(true);
@@ -37,6 +42,7 @@ export function App() {
         <input
           id="apiKey"
           type="password"
+          value={apiKey}
           placeholder="Your OpenAI api key"
           onInput={(e) => {
             setApiKey(e.currentTarget.value);
@@ -44,12 +50,22 @@ export function App() {
         />
       </div>
       <div>
+        <label for="model">OpenAI model</label>
+        <input
+          id="model"
+          type="text"
+          placeholder="The OpenAI model to use"
+          value={model}
+          onInput={(e) => {
+            setModel(e.currentTarget.value);
+          }}
+        />
+      </div>
+      <div>
         {saved ? (
           <div id="apiKeySaved">Saved !</div>
         ) : (
-          <button id="saveApiKey" onClick={onSave}>
-            Save
-          </button>
+          <button onClick={onSave}>Save</button>
         )}
       </div>
     </div>

@@ -2,13 +2,11 @@ import { callChatGPTWithSpec } from "./chat-gpt.ts";
 import { generators } from "./generators.ts";
 
 export async function generateAllFiles(
-  apiKey: string,
   technology: string,
   pageContent: string,
   pageId: string
 ) {
   const generatedCommands = await callChatGPTWithSpec(
-    apiKey,
     technology,
     "You should create all the folders and files. You should not write anything in the files. You should only use mkdir and touch commands. ",
     pageContent
@@ -34,7 +32,6 @@ export async function generateAllFiles(
           return undefined;
         }
         const generatedCommands = await callChatGPTWithSpec(
-          apiKey,
           technology,
           `${nestJSFile.promptOneFile.replace(
             "FILENAME",
