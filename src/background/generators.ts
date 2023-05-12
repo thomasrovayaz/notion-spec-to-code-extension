@@ -9,7 +9,7 @@ export const generators = [
     title: "Generate Controller",
     regex: /controller.ts$/,
     promptOneFile:
-      "You should generate the code of the controller file FILENAME. ",
+      "You should generate the code of the controller file FILENAME. You should adapt the guard, if the controller is in bff-worker folder you should use WorkerAuthGuard, if the controller is in bff-admin folder you should use AdminAuthGuard, otherwise you should use the SuperAdminAuthGuard. You should not add @Req param to get the user when you use the SuperAdminAuthGuard. You should adapt the params with body and query if necessary.  ",
     prompt:
       "You should only generate the code of the controller files. The controller files contains 'controller.ts' in the name. You should not generate any other file.",
     example: `import {
@@ -583,8 +583,8 @@ describe('Example provider', () => {
 })`,
   },
   {
-    id: "dto",
-    title: "Generate DTO",
+    id: "response-dto",
+    title: "Generate response DTO",
     regex: /response\.dto\.ts$/,
     promptOneFile:
       "You should generate the code of the DTO file FILENAME. Each ApiProperty should have a description and an example. You should use ApiPropertyOptional if the field is optional. Each field should be decorated with @Expose(). Each DTO class should be decorated with @Exclude(). A DTO should not have a type Object, you should create another DTO class in the file to replace the type object, like author in the following example. ",
@@ -669,6 +669,42 @@ export class ExampleResponseDto {
 }`,
   },
   {
+    id: "query-dto",
+    title: "Generate Query DTO",
+    regex: /query\.dto\.ts$/,
+    promptOneFile:
+      "You should generate the code of the DTO file FILENAME. Each ApiProperty should have a description and an example. You should use ApiPropertyOptional if the field is optional. Each field should be decorated with @Expose(). Each DTO class should be decorated with @Exclude(). A DTO should not have a type Object, you should create another DTO class in the file to replace the type object, like author in the following example. ",
+    prompt:
+      "You should only generate the code of the DTO files. The DTO files contains '.dto.ts' in the name. You should not generate any other file.",
+    example: `import { ApiPropertyOptional } from '@nestjs/swagger'
+import { Exclude, Expose } from 'class-transformer'
+import { IsInt, IsString, IsOptional } from 'class-validator'
+
+@Exclude()
+export class GetExampleQueryDto {
+  @ApiPropertyOptional({
+    name: 'idAuthor',
+    type: String,
+    example: '3c21a776-2c0c-4a57-b311-ad2b8a021f0f',
+  })
+  @Expose()
+  @IsString()
+  @IsOptional()
+  idAuthor?: string
+
+  @Expose()
+  @ApiPropertyOptional({
+    type: String,
+    example: '2023-03-10T12:00:00.000Z',
+    format: 'date-time',
+    description: 'The created at date',
+  })
+  @IsOptional()
+  @IsString()
+  createdAt?: string
+}`,
+  },
+  {
     id: "interceptor",
     title: "Generate interceptor",
     regex: /nest\/.*\.interceptor\.ts$/,
@@ -720,7 +756,7 @@ export class GetExampleInterceptor implements NestInterceptor {
   {
     id: "types",
     title: "Generate types",
-    regex: /\.types\.ts$/,
+    regex: /domain\/types\/.*\.ts$/,
     promptOneFile: "You should generate the code of the types file FILENAME. ",
     prompt:
       "You should only generate the code of the types files. The types files contains '.types.ts' in the name. You should not generate any other file.",
