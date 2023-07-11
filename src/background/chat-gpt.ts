@@ -58,7 +58,7 @@ export async function callChatGPTWithSpec(
         content:
           `The instructions are: "${customPrompt}".` +
           `Generate shell commands to make the previous instructions.` +
-          `Do not write any other text than the shell commands. Do not write any comment.` +
+          `Do not write any other text than the shell commands. Do not write any comment. Do not write the language used. ` +
           `You should reply ONLY the shell commands so I can copy and paste your response directly in the terminal. The response should be a list of shell commands.` +
           `You can use mkdir and echo command to accomplish the instructions.`,
       },

@@ -344,7 +344,7 @@ export class HubloPoolOfferModule {}`,
   {
     id: "contract_provider",
     title: "Generate Contract Provider",
-    regex: /contracts\/.*\.provider\.ts$/,
+    regex: /contracts\/.*\.contract\.ts$/,
     promptOneFile:
       "You should generate the code of the contract provider file FILENAME. It is an interface that defines the methods of the provider. ",
     prompt:

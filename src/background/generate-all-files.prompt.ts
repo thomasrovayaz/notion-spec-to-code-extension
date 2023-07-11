@@ -36,9 +36,9 @@ export async function generateAllFiles(
           `${nestJSFile.promptOneFile.replace(
             "FILENAME",
             file
-          )}. You should not write any other file. You should understand and use the style of code from this example of code: "${
+          )}. You should not write any other file. You should understand this example of code: "${
             nestJSFile.example
-          }".`,
+          }". You should transform this example to match the specifications. `,
           pageContent
         );
         console.log(`${file} loaded`);
@@ -46,7 +46,7 @@ export async function generateAllFiles(
         return {
           id: nestJSFile.id,
           title: nestJSFile.title,
-          result: generatedCommands,
+          result: generatedCommands?.replace("bash\n", ""),
         };
       })
     )
