@@ -3,8 +3,11 @@ import { runCustomPrompt } from "./run-custom.prompt.ts";
 import { getPageInfos } from "../utils/page-infos.ts";
 
 chrome.runtime.onMessage.addListener(async (msg) => {
+  const interval = keepAlive();
+
   if (msg.command === "callChatGPT") {
     await chrome.storage.local.set({ loading: true });
+
     try {
       const { content: pageContent, id: pageId } = await getPageInfos();
 
@@ -35,6 +38,8 @@ chrome.runtime.onMessage.addListener(async (msg) => {
       priority: 0,
     });
   }
+
+  clearInterval(interval);
 });
 
 async function onNotificationClicked() {
@@ -53,3 +58,5 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
   console.log("onInstalled", reason);
   chrome.storage.local.remove(["commands", "lastPageGenerated", "loading"]);
 });
+
+const keepAlive = () => setInterval(chrome.runtime.getPlatformInfo, 20e3);
