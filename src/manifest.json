@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "version": "0.1",
+    "version": "0.2",
     "name": "Notion specifications to code",
     "description": "Fetch specification content from a Notion page and generate shell commands using the OpenAI API.",
     "permissions": ["activeTab", "scripting", "storage", "clipboardWrite", "notifications"],

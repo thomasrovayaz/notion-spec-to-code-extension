@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "version": "0.2",
+  "name": "Notion specifications to code",
+  "description": "Fetch specification content from a Notion page and generate shell commands using the OpenAI API.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "clipboardWrite",
+    "notifications"
+  ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "assets/rocket.png",
+      "48": "assets/rocket.png",
+      "128": "assets/rocket128.png"
+    }
+  },
+  "host_permissions": [
+    "https://notion.so/*"
+  ],
+  "options_page": "options.html"
+}
