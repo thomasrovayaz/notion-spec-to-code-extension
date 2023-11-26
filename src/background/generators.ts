@@ -744,7 +744,7 @@ export class GetExampleInterceptor implements NestInterceptor {
             case RemoteDependencyException:
               throw err.toHttpException(500)
             case DatabaseQueryFailedException:
-              throw err.toHttpException(502)
+              throw err.toHttpException(500)
             default:
               throw err
           }

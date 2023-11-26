@@ -8,12 +8,18 @@ export async function generateAllFiles(
 ) {
   const generatedCommands = await callChatGPTWithSpec(
     technology,
-    "You should create all the folders and files. You should not write anything in the files. You should only use mkdir and touch commands. ",
+    "You should create all the folders and files. " +
+      "You should not write anything in the files. " +
+      "You should only use mkdir and touch commands. " +
+      `Generate shell commands to make the previous instructions.` +
+      `Do not write any other text than the shell commands. Do not write any comment. Do not write the language used. ` +
+      `You should reply ONLY the shell commands so I can copy and paste your response directly in the terminal. The response should be a list of shell commands.`,
     pageContent
   );
   if (!generatedCommands) {
     return;
   }
+  console.log("generatedCommands", generatedCommands);
   const files = generatedCommands
     .split("\n")
     .filter((line) => line.startsWith('echo "" >') || line.startsWith("touch "))
@@ -46,7 +52,7 @@ export async function generateAllFiles(
         return {
           id: nestJSFile.id,
           title: nestJSFile.title,
-          result: generatedCommands?.replace("bash\n", ""),
+          result: `echo "${generatedCommands}" > ${file}`,
         };
       })
     )

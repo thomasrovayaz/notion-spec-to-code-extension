@@ -29,7 +29,7 @@ async function callChatGPT(messages: { role: string; content: string }[]) {
     return choice.message.content
       .trim()
       .replaceAll("!", "\\!")
-      .replaceAll("```", "");
+      .replaceAll(/```.*/g, "");
   } catch (error) {
     console.error("Error generating commands from AI:", error);
   }
@@ -57,10 +57,8 @@ export async function callChatGPTWithSpec(
         role: "user",
         content:
           `The instructions are: "${customPrompt}".` +
-          `Generate shell commands to make the previous instructions.` +
-          `Do not write any other text than the shell commands. Do not write any comment. Do not write the language used. ` +
-          `You should reply ONLY the shell commands so I can copy and paste your response directly in the terminal. The response should be a list of shell commands.` +
-          `You can use mkdir and echo command to accomplish the instructions.`,
+          `Do not write any other text than the instruction. Do not write any comment or explication. Do not write the language used. ` +
+          `The response should be a file code.`,
       },
     ];
     generatedCommands = await callChatGPT(messages);
